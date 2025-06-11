@@ -2508,7 +2508,11 @@ checksum = "1c7a8fb8a9fbf66c1f703fe16184d10ca0ee9d23be5b4436400408ba54a95005"
 [[package]]
 name = "ecdsa"
 version = "0.16.9"
+<<<<<<< HEAD
 source = "git+https://github.com/ziren-patches/signatures.git?branch=patch-ecdsa-0.16.9#da0cd8753b243e09acf82f8e58f8da0e28e7287d"
+=======
+source = "git+https://github.com/zkMIPS-patches/signatures?branch=patch-ecdsa-0.16.9#fed1f3bbd4207450cebcc6d601c226f2cccccb3b"
+>>>>>>> 3145761 (opt: skip local execution when proof generation is required)
 dependencies = [
  "der",
  "digest 0.10.7",
@@ -7263,7 +7267,11 @@ dependencies = [
 [[package]]
 name = "rfc6979"
 version = "0.4.0"
+<<<<<<< HEAD
 source = "git+https://github.com/ziren-patches/signatures.git?branch=patch-ecdsa-0.16.9#da0cd8753b243e09acf82f8e58f8da0e28e7287d"
+=======
+source = "git+https://github.com/zkMIPS-patches/signatures?branch=patch-ecdsa-0.16.9#fed1f3bbd4207450cebcc6d601c226f2cccccb3b"
+>>>>>>> 3145761 (opt: skip local execution when proof generation is required)
 dependencies = [
  "hmac",
  "subtle",

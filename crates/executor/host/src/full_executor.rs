@@ -5,6 +5,10 @@ use std::{
     time::{Duration, Instant},
 };
 
+use crate::{
+    executor_components::MaybeProveWithCycles, Config, ExecutionHooks, ExecutorComponents,
+    HostExecutor,
+};
 use alloy_provider::Provider;
 use either::Either;
 use eyre::bail;
@@ -20,8 +24,6 @@ use zkm_sdk::{
     ExecutionReport, Prover, ZKMProofKind, ZKMProvingKey, ZKMPublicValues, ZKMStdin,
     ZKMVerifyingKey,
 };
-
-use crate::{Config, ExecutionHooks, ExecutorComponents, HostExecutor};
 
 pub type EitherExecutor<C, P> = Either<FullExecutor<C, P>, CachedExecutor<C>>;
 
@@ -53,7 +55,7 @@ where
                 config.chain.id(),
                 config.prove_mode,
             )
-            .await?,
+                .await?,
         ));
     }
 
@@ -77,32 +79,12 @@ pub trait BlockExecutor<C: ExecutorComponents> {
         hooks: &C::Hooks,
         prove_mode: Option<ZKMProofKind>,
     ) -> eyre::Result<()> {
-        // Generate the proof.
-        // Execute the block inside the zkVM.
         let mut stdin = ZKMStdin::new();
         let buffer = bincode::serialize(&client_input).unwrap();
 
         stdin.write_vec(buffer);
 
-        crate::utils::zkm_dump(&self.pk().elf, &stdin, client_input.current_block.number);
-
-        // Only execute the program.
-        let (stdin, execute_result) =
-            execute_client(client_input.current_block.number, self.client(), self.pk(), stdin)
-                .await?;
-        let (mut public_values, execution_report) = execute_result?;
-
-        let cycles: u64 = execution_report.cycle_tracker.values().sum();
-        info!("total cycles: {:?}", cycles);
-
-        // Read the block hash.
-        let block_hash = public_values.read::<B256>();
-        info!(?block_hash, "Execution sucessful");
-
-        hooks
-            .on_execution_end::<C::Primitives>(&client_input.current_block, &execution_report)
-            .await?;
-
+        // Generate the proof.
         if let Some(prove_mode) = prove_mode {
             info!("Starting proof generation");
 
@@ -111,29 +93,45 @@ pub trait BlockExecutor<C: ExecutorComponents> {
             let client = self.client();
             let pk = self.pk();
 
-            let proof = task::spawn_blocking(move || {
-                client.prove(pk.as_ref(), stdin, prove_mode).map_err(|err| eyre::eyre!("{err}"))
-            })
-            .await
-            .map_err(|err| eyre::eyre!("{err}"))??;
+            let proof_with_cycles = client.prove_with_cycles(&pk, &stdin, prove_mode).await?;
 
             let proving_duration = proving_start.elapsed();
-            let proof_bytes = bincode::serialize(&proof.proof).unwrap();
-            let public_values_bytes = bincode::serialize(&proof.public_values).unwrap();
+            let proof_bytes = bincode::serialize(&proof_with_cycles.0.proof).unwrap();
+            let public_values_bytes = bincode::serialize(&proof_with_cycles.public_values).unwrap();
 
             hooks
                 .on_proving_end(
                     client_input.current_block.number,
                     &proof_bytes,
                     &public_values_bytes,
-                    &proof.zkm_version,
+                    &proof_with_cycles.zkm_version,
                     self.vk().as_ref(),
-                    &execution_report,
+                    proof_with_cycles.1,
                     proving_duration,
                 )
                 .await?;
 
-            info!("Proof successfully generated! proving duration: {:?}", proving_duration);
+            info!("Proof for block {} successfully generated! Proving took {:?}", client_input.current_block.number, proving_duration);
+        } else {
+            // Execute the block inside the zkVM.
+            crate::utils::zkm_dump(&self.pk().elf, &stdin, client_input.current_block.number);
+
+            // Only execute the program.
+            let (_, execute_result) =
+                execute_client(client_input.current_block.number, self.client(), self.pk(), stdin)
+                    .await?;
+            let (mut public_values, execution_report) = execute_result?;
+
+            let cycles: u64 = execution_report.cycle_tracker.values().sum();
+            info!("total cycles: {:?}", cycles);
+
+            // Read the block hash.
+            let block_hash = public_values.read::<B256>();
+            info!(?block_hash, "Execution successful");
+
+            hooks
+                .on_execution_end::<C::Primitives>(&client_input.current_block, &execution_report)
+                .await?;
         }
 
         Ok(())
@@ -208,7 +206,7 @@ where
             let (pk, vk) = cloned_client.setup(&elf);
             (pk, vk)
         })
-        .await?;
+            .await?;
 
         Ok(Self {
             provider,
@@ -351,7 +349,7 @@ where
             let (pk, vk) = cloned_client.setup(&elf);
             (pk, vk)
         })
-        .await?;
+            .await?;
 
         Ok(Self {
             cache_dir,
@@ -375,7 +373,7 @@ where
             self.chain_id,
             block_number,
         )?
-        .ok_or(eyre::eyre!("No cached input found"))?;
+            .ok_or(eyre::eyre!("No cached input found"))?;
 
         self.process_client(client_input, &self.hooks, self.prove_mode).await
     }
@@ -415,8 +413,8 @@ async fn execute_client<P: Prover<DefaultProverComponents> + 'static>(
             (stdin, result.map_err(|err| eyre::eyre!("{err}")))
         })
     })
-    .await
-    .map_err(|err| eyre::eyre!("{err}"))
+        .await
+        .map_err(|err| eyre::eyre!("{err}"))
 }
 
 fn try_load_input_from_cache<P: NodePrimitives + DeserializeOwned>(
