@@ -150,7 +150,7 @@ impl ExecutionHooks for EthProofsClient {
             proving_duration.as_secs_f32(),
             vk,
         )
-            .await;
+        .await;
 
         Ok(())
     }

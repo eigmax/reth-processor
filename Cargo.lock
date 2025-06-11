@@ -3809,6 +3809,7 @@ dependencies = [
  "dotenv",
  "either",
  "eyre",
+ "futures",
  "guest-executor",
  "mpt",
  "op-alloy-network",
