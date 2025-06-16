@@ -28,12 +28,12 @@ pub trait ExecutorComponents {
     type Network: Network;
 
     type Primitives: NodePrimitives
-        + DeserializeOwned
-        + IntoPrimitives<Self::Network>
-        + IntoInput
-        + ValidateBlockPostExecution;
+    + DeserializeOwned
+    + IntoPrimitives<Self::Network>
+    + IntoInput
+    + ValidateBlockPostExecution;
 
-    type EvmConfig: ConfigureEvm<Primitives = Self::Primitives>;
+    type EvmConfig: ConfigureEvm<Primitives=Self::Primitives>;
 
     type Hooks: ExecutionHooks;
 }
@@ -121,7 +121,7 @@ impl MaybeProveWithCycles for NetworkProver {
             "NetworkProver only supports Compressed and Groth16 proof modes"
         );
         let (proof, cycles) = self
-            .prove_with_cycles(&pk.elf, stdin.clone(), mode)
+            .prove_with_cycles(&pk.elf, stdin.clone(), mode, None)
             .await
             .map_err(|err| eyre!("Proof failed: {err}"))?;
 

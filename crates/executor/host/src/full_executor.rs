@@ -30,6 +30,7 @@ pub type EitherExecutor<C, P> = Either<FullExecutor<C, P>, CachedExecutor<C>>;
 pub async fn build_executor<C, P>(
     elf: Vec<u8>,
     provider: Option<P>,
+    debug_provider: Option<P>,
     evm_config: C::EvmConfig,
     client: Arc<C::Prover>,
     hooks: C::Hooks,
@@ -40,8 +41,9 @@ where
     P: Provider<C::Network> + Clone,
 {
     if let Some(provider) = provider {
+        let debug_provider = debug_provider.unwrap_or(provider.clone());
         return Ok(Either::Left(
-            FullExecutor::try_new(provider, elf, evm_config, client, hooks, config).await?,
+            FullExecutor::try_new(provider, debug_provider, elf, evm_config, client, hooks, config).await?,
         ));
     }
 
@@ -55,7 +57,7 @@ where
                 config.chain.id(),
                 config.prove_mode,
             )
-            .await?,
+                .await?,
         ));
     }
 
@@ -97,14 +99,14 @@ pub trait BlockExecutor<C: ExecutorComponents> {
 
             let proving_duration = proving_start.elapsed();
             let proof_bytes = bincode::serialize(&proof_with_cycles.0.proof).unwrap();
-            let public_values_bytes = bincode::serialize(&proof_with_cycles.public_values).unwrap();
+            let public_values_bytes = bincode::serialize(&proof_with_cycles.0.public_values).unwrap();
 
             hooks
                 .on_proving_end(
                     client_input.current_block.number,
                     &proof_bytes,
                     &public_values_bytes,
-                    &proof_with_cycles.zkm_version,
+                    &proof_with_cycles.0.zkm_version,
                     self.vk().as_ref(),
                     proof_with_cycles.1,
                     proving_duration,
@@ -181,6 +183,7 @@ where
     P: Provider<C::Network> + Clone,
 {
     provider: P,
+    debug_provider: P,
     host_executor: HostExecutor<C::EvmConfig>,
     client: Arc<C::Prover>,
     pk: Arc<ZKMProvingKey>,
@@ -196,6 +199,7 @@ where
 {
     pub async fn try_new(
         provider: P,
+        debug_provider: P,
         elf: Vec<u8>,
         evm_config: C::EvmConfig,
         client: Arc<C::Prover>,
@@ -209,10 +213,11 @@ where
             let (pk, vk) = cloned_client.setup(&elf);
             (pk, vk)
         })
-        .await?;
+            .await?;
 
         Ok(Self {
             provider,
+            debug_provider,
             host_executor: HostExecutor::new(evm_config),
             client,
             pk: Arc::new(pk),
@@ -254,6 +259,7 @@ where
             }
         });
 
+        let now = Instant::now();
         let client_input = match client_input_from_cache {
             Some(mut client_input_from_cache) => {
                 // Override opcode tracking from cache by the setting provided by the user
@@ -261,7 +267,7 @@ where
                 client_input_from_cache
             }
             None => {
-                let rpc_db = RpcDb::new(self.provider.clone(), block_number - 1);
+                let rpc_db = RpcDb::new(self.provider.clone(), self.debug_provider.clone(), block_number - 1);
 
                 // Execute the host.
                 let client_input = self
@@ -291,8 +297,14 @@ where
                 client_input
             }
         };
+        info!(
+            "Block {} executed in {:?}",
+            block_number,
+             now.elapsed()
+        );
 
         self.process_client(client_input, &self.hooks, self.config.prove_mode).await?;
+
 
         Ok(())
     }
@@ -352,7 +364,7 @@ where
             let (pk, vk) = cloned_client.setup(&elf);
             (pk, vk)
         })
-        .await?;
+            .await?;
 
         Ok(Self {
             cache_dir,
@@ -376,7 +388,7 @@ where
             self.chain_id,
             block_number,
         )?
-        .ok_or(eyre::eyre!("No cached input found"))?;
+            .ok_or(eyre::eyre!("No cached input found"))?;
 
         self.process_client(client_input, &self.hooks, self.prove_mode).await
     }
@@ -416,8 +428,8 @@ async fn execute_client<P: Prover<DefaultProverComponents> + 'static>(
             (stdin, result.map_err(|err| eyre::eyre!("{err}")))
         })
     })
-    .await
-    .map_err(|err| eyre::eyre!("{err}"))
+        .await
+        .map_err(|err| eyre::eyre!("{err}"))
 }
 
 fn try_load_input_from_cache<P: NodePrimitives + DeserializeOwned>(
