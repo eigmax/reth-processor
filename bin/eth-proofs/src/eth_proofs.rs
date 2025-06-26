@@ -6,7 +6,7 @@ use host_executor::ExecutionHooks;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use tracing::error;
-use zkm_sdk::{ExecutionReport, HashableKey, ZKMVerifyingKey};
+use zkm_sdk::{HashableKey, ZKMVerifyingKey};
 
 #[derive(Debug, Clone)]
 pub struct EthProofsClient {

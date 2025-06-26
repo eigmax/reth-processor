@@ -28,12 +28,12 @@ pub trait ExecutorComponents {
     type Network: Network;
 
     type Primitives: NodePrimitives
-    + DeserializeOwned
-    + IntoPrimitives<Self::Network>
-    + IntoInput
-    + ValidateBlockPostExecution;
+        + DeserializeOwned
+        + IntoPrimitives<Self::Network>
+        + IntoInput
+        + ValidateBlockPostExecution;
 
-    type EvmConfig: ConfigureEvm<Primitives=Self::Primitives>;
+    type EvmConfig: ConfigureEvm<Primitives = Self::Primitives>;
 
     type Hooks: ExecutionHooks;
 }
@@ -81,12 +81,14 @@ where
 }
 
 pub trait MaybeProveWithCycles {
-    async fn prove_with_cycles(
+    fn prove_with_cycles(
         &self,
         pk: &ZKMProvingKey,
         stdin: &ZKMStdin,
         mode: ZKMProofKind,
-    ) -> Result<(ZKMProofWithPublicValues, Option<u64>), eyre::Error>;
+    ) -> impl std::future::Future<
+        Output = Result<(ZKMProofWithPublicValues, Option<u64>), eyre::Error>,
+    > + Send;
 }
 
 impl MaybeProveWithCycles for ProverClient {
@@ -102,6 +104,7 @@ impl MaybeProveWithCycles for ProverClient {
             ZKMProofKind::Compressed => prove.compressed(),
             ZKMProofKind::Groth16 => prove.groth16(),
             ZKMProofKind::Plonk => prove.plonk(),
+            ZKMProofKind::CompressToGroth16 => unreachable!(),
         };
         let proof = prove.run().map_err(|err| eyre!("{err}"))?;
 

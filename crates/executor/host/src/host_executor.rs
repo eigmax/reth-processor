@@ -4,7 +4,7 @@ use futures::future::try_join_all;
 use tokio::sync::Semaphore;
 
 use crate::{error::SpawnedTaskError, HostError};
-use alloy_consensus::{BlockHeader, Header, Transaction, TxReceipt};
+use alloy_consensus::{BlockHeader, Header, TxReceipt};
 use alloy_evm::EthEvmFactory;
 use alloy_primitives::{Bloom, Sealable};
 use alloy_provider::{Network, Provider};
@@ -22,9 +22,9 @@ use reth_evm::{
 use reth_evm_ethereum::EthEvmConfig;
 use reth_execution_types::ExecutionOutcome;
 use reth_optimism_evm::OpEvmConfig;
-use reth_primitives_traits::{Block, BlockBody, SignedTransaction};
+use reth_primitives_traits::{Block, BlockBody};
 use reth_trie::KeccakKeyHasher;
-use revm::{database::CacheDB, Database};
+use revm::database::CacheDB;
 use revm_primitives::{Address, B256};
 use rpc_db::RpcDb;
 
@@ -109,7 +109,8 @@ impl<C: ConfigureEvm> HostExecutor<C> {
             .try_into_recovered()
             .map_err(|_| HostError::FailedToRecoverSenders)
             .unwrap();
-        let block_executor = BasicBlockExecutor::new(self.evm_config.clone(), cache_db, Some(chain_id));
+        let block_executor =
+            BasicBlockExecutor::new(self.evm_config.clone(), cache_db, Some(chain_id));
 
         // Execute the block and fetch all the necessary data along the way.
         tracing::info!(

@@ -1,20 +1,21 @@
 #![cfg_attr(not(test), warn(unused_crate_dependencies))]
+use std::sync::{Arc, RwLock};
 
 use alloy_primitives::{map::HashMap, private::serde::Deserialize, Bytes, U256};
 use alloy_provider::{
     network::{primitives::HeaderResponse, BlockResponse},
     Network, Provider,
 };
-use alloy_rpc_types::{Block, BlockId};
+use alloy_rpc_types::BlockId;
 use indexmap::IndexMap;
 use reth_storage_errors::{db::DatabaseError, provider::ProviderError};
 use revm_database_interface::DatabaseRef;
 use revm_primitives::{Address, B256};
 use revm_state::{AccountInfo, Bytecode};
-use std::{borrow::Cow, collections::{BTreeMap, BTreeSet}, fs, marker::PhantomData, sync::{Arc, RwLock}};
-use std::path::Path;
-use std::thread::sleep;
-use std::time::Duration;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    marker::PhantomData,
+};
 use tracing::{debug, info};
 
 /// A database that fetches data from a [Provider] over a [Transport].
@@ -162,7 +163,10 @@ impl<P: Provider<N> + Clone, N: Network> RpcDb<P, N> {
             .get(&address)
             .and_then(|inner| inner.get(&index).copied())
         {
-            debug!("fetching account info from cache for address {}, index {:x}, value {}", address, index, value);
+            debug!(
+                "fetching account info from cache for address {}, index {:x}, value {}",
+                address, index, value
+            );
             return Ok(value);
         }
 
@@ -173,7 +177,10 @@ impl<P: Provider<N> + Clone, N: Network> RpcDb<P, N> {
             .block_id(self.block)
             .await
             .map_err(|e| RpcDbError::GetStorageError(address, index, e.to_string()))?;
-        debug!("[fetch_storage_at] fetching storage value at address: {}, index: {}, value {}", address, index, value);
+        debug!(
+            "[fetch_storage_at] fetching storage value at address: {}, index: {}, value {}",
+            address, index, value
+        );
 
         // Record the storage value to the state.
         let mut storage_values = self.storage.write().map_err(|_| RpcDbError::Poisoned)?;
@@ -207,10 +214,7 @@ impl<P: Provider<N> + Clone, N: Network> RpcDb<P, N> {
     /// Preloads accounts and storage for the current block.
     ///  We use debug_provider.
     pub async fn preload_accounts_and_storage(&self) -> Result<(), RpcDbError> {
-        info!(
-            "Preloading accounts and storage for block: {}",
-            self.block
-        );
+        info!("Preloading accounts and storage for block: {}", self.block);
         let current_block = self.block.as_u64().unwrap() + 1;
         let params = (
             format!("0x{:x}", current_block),
@@ -228,18 +232,16 @@ impl<P: Provider<N> + Clone, N: Network> RpcDb<P, N> {
             .debug_provider
             .raw_request("debug_traceBlockByNumber".into(), params)
             .await
-            .map_err(|e| {
-                RpcDbError::GetBlockError(current_block, e.to_string())
-            })?;
-        info!("rpc request took: {:?}, got {} txs", now.elapsed(),prestate.0.len());
+            .map_err(|e| RpcDbError::GetBlockError(current_block, e.to_string()))?;
+        info!("rpc request took: {:?}, got {} txs", now.elapsed(), prestate.0.len());
 
         for tx_trace in prestate.0 {
             for (address, account) in tx_trace.result {
                 if !self.accounts.read().map_err(|_| RpcDbError::Poisoned)?.contains_key(&address) {
                     let bytecode = account.code.clone().map(Bytecode::new_raw);
-                    /// Some RPC will return incorrect code and nonce for accounts with EIP-7702,
-                    /// we will ignore these accounts.
-                    /// This is a temporary fix
+                    // Some RPC will return incorrect code and nonce for accounts with EIP-7702,
+                    // we will ignore these accounts.
+                    // This is a temporary fix
                     if bytecode.as_ref().is_some_and(|bc| bc.is_eip7702()) {
                         continue;
                     }
@@ -258,7 +260,9 @@ impl<P: Provider<N> + Clone, N: Network> RpcDb<P, N> {
                 if let Some(storage_map) = account.storage {
                     let mut storage_lock =
                         self.storage.write().map_err(|_| RpcDbError::Poisoned)?;
-                    let account_storage = storage_lock.entry(address).or_insert_with(|| HashMap::with_hasher(Default::default()));
+                    let account_storage = storage_lock
+                        .entry(address)
+                        .or_insert_with(|| HashMap::with_hasher(Default::default()));
 
                     for (slot, value) in storage_map {
                         account_storage.entry(slot).or_insert(value);
