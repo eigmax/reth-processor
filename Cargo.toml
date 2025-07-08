@@ -96,6 +96,7 @@ reth-optimism-forks = { git = "https://github.com/ziren-patches/reth", branch = 
 revm = { git = "https://github.com/ziren-patches/revm", branch = "patch-22.0.0", features = [
     "serde",
     "kzg-rs",
+    "bn",
 ], default-features = false }
 revm-bytecode = { git = "https://github.com/ziren-patches/revm", branch = "patch-22.0.0", default-features = false }
 revm-state = { git = "https://github.com/ziren-patches/revm", branch = "patch-22.0.0", default-features = false }

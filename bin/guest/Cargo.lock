@@ -176,9 +176,9 @@ dependencies = [
 
 [[package]]
 name = "alloy-hardforks"
-version = "0.2.11"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ce138b29a2f8e7ed97c064af8359dfa6559c12cba5e821ae4eb93081a56557e"
+checksum = "819a3620fe125e0fff365363315ee5e24c23169173b19747dfd6deba33db8990"
 dependencies = [
  "alloy-chains",
  "alloy-eip2124",
@@ -959,6 +959,26 @@ name = "byte-slice-cast"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7575182f7272186991736b70173b0ea045398f984bf5ebbb3804736ce1330c9d"
+
+[[package]]
+name = "bytemuck"
+version = "1.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c76a5792e44e4abe34d3abf15636779261d45a7450612059293d1d2cfc63422"
+dependencies = [
+ "bytemuck_derive",
+]
+
+[[package]]
+name = "bytemuck_derive"
+version = "1.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ecc273b49b3205b83d648f0690daa588925572cc5063745bfe547fe7ec8e1a1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.104",
+]
 
 [[package]]
 name = "byteorder"
@@ -2043,6 +2063,9 @@ name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
+dependencies = [
+ "spin",
+]
 
 [[package]]
 name = "libc"
@@ -3496,6 +3519,7 @@ dependencies = [
  "revm-primitives",
  "ripemd",
  "sha2",
+ "substrate-bn",
 ]
 
 [[package]]
@@ -3959,6 +3983,22 @@ dependencies = [
  "quote",
  "rustversion",
  "syn 2.0.104",
+]
+
+[[package]]
+name = "substrate-bn"
+version = "0.6.0"
+source = "git+https://github.com/ziren-patches/bn?branch=patch-0.6.0#aba71380457d798039111e6cc0fdf2e0718c6766"
+dependencies = [
+ "bytemuck",
+ "byteorder",
+ "cfg-if",
+ "crunchy",
+ "lazy_static",
+ "num-bigint 0.4.6",
+ "rand 0.8.5",
+ "rustc-hex",
+ "zkm-lib",
 ]
 
 [[package]]
@@ -4808,7 +4848,7 @@ dependencies = [
 [[package]]
 name = "zkm-lib"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#a8d824b42b4718f36ba087f31090a891adc01bbf"
+source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -4821,7 +4861,7 @@ dependencies = [
 [[package]]
 name = "zkm-primitives"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#a8d824b42b4718f36ba087f31090a891adc01bbf"
+source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
 dependencies = [
  "bincode",
  "hex",
@@ -4839,7 +4879,7 @@ dependencies = [
 [[package]]
 name = "zkm-zkvm"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#a8d824b42b4718f36ba087f31090a891adc01bbf"
+source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -4890,11 +4930,6 @@ source = "git+https://github.com/ziren-patches/core.git?branch=patch-alloy-primi
 name = "alloy-primitives"
 version = "1.1.0"
 source = "git+https://github.com/ziren-patches/core.git?branch=patch-alloy-primitives-1.1.0#66386c419c93166f8471d3ace213d41ffcb13635"
-
-[[patch.unused]]
-name = "substrate-bn"
-version = "0.6.0"
-source = "git+https://github.com/ziren-patches/bn?branch=patch-0.6.0#104798befad54a5ec9116408d9ddd0c4fd015399"
 
 [[patch.unused]]
 name = "p256"
