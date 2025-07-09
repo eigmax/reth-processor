@@ -31,6 +31,7 @@ async fn test_in_zkvm() {
         chain: Chain::mainnet(),
         genesis: Genesis::Mainnet,
         rpc_url: None,
+        debug_rpc_url: None,
         cache_dir: None,
         custom_beneficiary: None,
         prove_mode: None,
@@ -48,6 +49,7 @@ async fn test_in_zkvm() {
     let executor = build_executor::<EthExecutorComponents<_>, _>(
         elf,
         Some(provider),
+        None,
         block_execution_strategy_factory,
         client,
         Hook::new(is_base_branch),
