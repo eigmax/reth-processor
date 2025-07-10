@@ -3780,6 +3780,7 @@ dependencies = [
  "serde_json",
  "thousands",
  "tokio",
+ "tracing",
  "tracing-subscriber",
  "url",
  "zkm-build",
@@ -3807,6 +3808,8 @@ dependencies = [
  "eyre",
  "futures",
  "guest-executor",
+ "hex",
+ "lazy_static",
  "mpt",
  "op-alloy-network",
  "primitives",
@@ -3828,6 +3831,7 @@ dependencies = [
  "rpc-db",
  "serde",
  "serde_json",
+ "sha2",
  "strum 0.26.3",
  "thiserror 1.0.69",
  "tokio",
@@ -7973,8 +7977,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.8"
-source = "git+https://github.com/ziren-patches/RustCrypto-hashes?branch=patch-sha2-0.10.8#62d9223ba171ef6d5b637b275c4b982f56d0a949"
+version = "0.10.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -10065,7 +10070,7 @@ dependencies = [
 [[package]]
 name = "zkm-build"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -10077,7 +10082,7 @@ dependencies = [
 [[package]]
 name = "zkm-core-executor"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10117,7 +10122,7 @@ dependencies = [
 [[package]]
 name = "zkm-core-machine"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -10169,7 +10174,7 @@ dependencies = [
 [[package]]
 name = "zkm-curves"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "cfg-if",
  "curve25519-dalek",
@@ -10191,7 +10196,7 @@ dependencies = [
 [[package]]
 name = "zkm-derive"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "quote",
  "syn 1.0.109",
@@ -10200,7 +10205,7 @@ dependencies = [
 [[package]]
 name = "zkm-lib"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -10213,7 +10218,7 @@ dependencies = [
 [[package]]
 name = "zkm-primitives"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "bincode",
  "hex",
@@ -10231,7 +10236,7 @@ dependencies = [
 [[package]]
 name = "zkm-prover"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10270,7 +10275,7 @@ dependencies = [
 [[package]]
 name = "zkm-recursion-circuit"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "hashbrown 0.14.5",
  "itertools 0.13.0",
@@ -10303,7 +10308,7 @@ dependencies = [
 [[package]]
 name = "zkm-recursion-compiler"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "backtrace",
  "itertools 0.13.0",
@@ -10324,7 +10329,7 @@ dependencies = [
 [[package]]
 name = "zkm-recursion-core"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "backtrace",
  "ff 0.13.1",
@@ -10360,7 +10365,7 @@ dependencies = [
 [[package]]
 name = "zkm-recursion-derive"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "quote",
  "syn 1.0.109",
@@ -10369,7 +10374,7 @@ dependencies = [
 [[package]]
 name = "zkm-recursion-gnark-ffi"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10394,7 +10399,7 @@ dependencies = [
 [[package]]
 name = "zkm-sdk"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "alloy-signer 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "alloy-signer-local",
@@ -10441,7 +10446,7 @@ dependencies = [
 [[package]]
 name = "zkm-stark"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "arrayref",
  "hashbrown 0.14.5",
@@ -10483,7 +10488,7 @@ dependencies = [
 [[package]]
 name = "zkm-zkvm"
 version = "1.1.1"
-source = "git+https://github.com/ProjectZKM/Ziren#52dd269d475b10b6b2ddc5df3155814633491f24"
+source = "git+https://github.com/ProjectZKM/Ziren#0e6bfa58c173be95f8886d13bc6a488924da425c"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -10557,3 +10562,8 @@ source = "git+https://github.com/ziren-patches/core.git?branch=patch-alloy-primi
 name = "alloy-primitives"
 version = "1.1.2"
 source = "git+https://github.com/ziren-patches/core.git?branch=patch-alloy-primitives-1.1.2#288a6856fc6e4160e85903f2af1c4af92ed4ccf9"
+
+[[patch.unused]]
+name = "sha2"
+version = "0.10.8"
+source = "git+https://github.com/ziren-patches/RustCrypto-hashes?branch=patch-sha2-0.10.8#62d9223ba171ef6d5b637b275c4b982f56d0a949"

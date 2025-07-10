@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, sync::RwLock};
 
 use alloy_evm::EthEvmFactory;
 use alloy_network::Ethereum;
@@ -7,6 +7,7 @@ use eyre::eyre;
 use guest_executor::{
     custom::CustomEvmFactory, IntoInput, IntoPrimitives, ValidateBlockPostExecution,
 };
+use lazy_static::lazy_static;
 use op_alloy_network::Optimism;
 use reth_ethereum_primitives::EthPrimitives;
 use reth_evm::ConfigureEvm;
@@ -15,12 +16,17 @@ use reth_optimism_evm::OpEvmConfig;
 use reth_optimism_primitives::OpPrimitives;
 use reth_primitives_traits::NodePrimitives;
 use serde::de::DeserializeOwned;
+use sha2::{Digest, Sha256};
 use zkm_prover::{components::DefaultProverComponents, ZKMProvingKey};
 use zkm_sdk::{
     NetworkProver, Prover, ProverClient, ZKMProofKind, ZKMProofWithPublicValues, ZKMStdin,
 };
 
 use crate::ExecutionHooks;
+
+lazy_static! {
+    static ref ELF_ID: RwLock<String> = RwLock::new(Default::default());
+}
 
 pub trait ExecutorComponents {
     type Prover: Prover<DefaultProverComponents> + MaybeProveWithCycles + 'static;
@@ -123,11 +129,24 @@ impl MaybeProveWithCycles for NetworkProver {
             mode == ZKMProofKind::Compressed || mode == ZKMProofKind::Groth16,
             "NetworkProver only supports Compressed and Groth16 proof modes"
         );
+
+        let elf_id = hex::encode(Sha256::digest(&pk.elf));
+
+        let (elf, elf_id) = if *ELF_ID.read().unwrap() != elf_id {
+            let mut id = ELF_ID.write().unwrap();
+            *id = elf_id;
+
+            (&pk.elf, None)
+        } else {
+            (&Default::default(), Some(elf_id))
+        };
+        tracing::info!("elf id: {:?}", elf_id);
+
         let (proof, cycles) = self
-            .prove_with_cycles(&pk.elf, stdin.clone(), mode, None)
+            .prove_with_cycles(elf, stdin.clone(), mode, elf_id, None)
             .await
             .map_err(|err| eyre!("Proof failed: {err}"))?;
 
-        Ok((proof, Some(cycles)))
+        return Ok((proof, Some(cycles)));
     }
 }

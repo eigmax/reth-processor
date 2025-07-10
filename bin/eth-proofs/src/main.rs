@@ -36,7 +36,8 @@ async fn main() -> eyre::Result<()> {
             EnvFilter::from_default_env()
                 .add_directive("zkm_core_machine=warn".parse().unwrap())
                 .add_directive("zkm_core_executor=warn".parse().unwrap())
-                .add_directive("zkm_prover=warn".parse().unwrap()),
+                .add_directive("zkm_prover=warn".parse().unwrap())
+                .add_directive("zkm_sdk=info".parse().unwrap()),
         )
         .init();
 

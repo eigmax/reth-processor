@@ -9,6 +9,8 @@ use provider::create_provider;
 use tracing_subscriber::{
     filter::EnvFilter, fmt, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt,
 };
+#[cfg(feature = "network_prover")]
+use zkm_sdk::NetworkProver;
 use zkm_sdk::{include_elf, ProverClient};
 
 mod cli;
@@ -30,7 +32,8 @@ async fn main() -> eyre::Result<()> {
             EnvFilter::from_default_env()
                 .add_directive("zkm_core_machine=warn".parse().unwrap())
                 .add_directive("zkm_core_executor::executor=warn".parse().unwrap())
-                .add_directive("zkm_prover=warn".parse().unwrap()),
+                .add_directive("zkm_prover=warn".parse().unwrap())
+                .add_directive("zkm_sdk=info".parse().unwrap()),
         )
         .init();
 
@@ -46,7 +49,18 @@ async fn main() -> eyre::Result<()> {
         args.opcode_tracking,
     );
 
-    let prover_client = Arc::new(ProverClient::new());
+    #[cfg(feature = "network_prover")]
+    let prover_client = {
+        let np = NetworkProver::from_env().map_err(|_| {
+            eyre::eyre!("Failed to create NetworkProver from environment variables")
+        })?;
+        Arc::new(np)
+    };
+    #[cfg(not(feature = "network_prover"))]
+    let prover_client = {
+        tracing::info!("Use local ProverClient");
+        Arc::new(ProverClient::new())
+    };
 
     let elf = include_elf!("reth").to_vec();
     let block_execution_strategy_factory =
@@ -54,7 +68,7 @@ async fn main() -> eyre::Result<()> {
     let provider = config.rpc_url.as_ref().map(|url| create_provider(url.clone()));
     let debug_provider = config.debug_rpc_url.as_ref().map(|url| create_provider(url.clone()));
 
-    let executor = build_executor::<EthExecutorComponents<_>, _>(
+    let executor = build_executor::<EthExecutorComponents<_, _>, _>(
         elf,
         provider,
         debug_provider,
