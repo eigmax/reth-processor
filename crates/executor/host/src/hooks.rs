@@ -31,7 +31,7 @@ pub trait ExecutionHooks: Send {
         _public_values_bytes: &[u8],
         _zkm_version: &str,
         _vk: &ZKMVerifyingKey,
-        _cycles: Option<u64>,
+        _cycles: u64,
         _proving_duration: Duration,
     ) -> impl Future<Output = eyre::Result<()>> {
         async { Ok(()) }

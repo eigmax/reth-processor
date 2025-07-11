@@ -108,7 +108,7 @@ pub trait BlockExecutor<C: ExecutorComponents> {
             } else {
                 Some(elf_id)
             };
-            tracing::info!("elf id: {:?}", elf_id);
+            info!("elf id: {:?}", elf_id);
 
             let proof_with_cycles = task::spawn_blocking(move || {
                 client
@@ -117,6 +117,8 @@ pub trait BlockExecutor<C: ExecutorComponents> {
             })
             .await
             .map_err(|err| eyre::eyre!("{err}"))??;
+
+            info!("cycles: {:?}", proof_with_cycles.1);
 
             let proving_duration = proving_start.elapsed();
             let proof_bytes = bincode::serialize(&proof_with_cycles.0.proof).unwrap();

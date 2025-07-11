@@ -140,17 +140,10 @@ impl ExecutionHooks for EthProofsClient {
         _public_values_bytes: &[u8],
         _zkm_version: &str,
         vk: &ZKMVerifyingKey,
-        cycles: Option<u64>,
+        cycles: u64,
         proving_duration: Duration,
     ) -> eyre::Result<()> {
-        self.proved(
-            proof_bytes,
-            block_number,
-            cycles.ok_or_else(|| eyre!("The cycle count is required"))?,
-            proving_duration.as_secs_f32(),
-            vk,
-        )
-        .await;
+        self.proved(proof_bytes, block_number, cycles, proving_duration.as_secs_f32(), vk).await;
 
         Ok(())
     }
