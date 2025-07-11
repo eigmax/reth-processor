@@ -12,8 +12,6 @@ use host_executor::{
 use provider::create_provider;
 use tracing::{error, info};
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-#[cfg(feature = "network_prover")]
-use zkm_sdk::NetworkProver;
 use zkm_sdk::{include_elf, ProverClient};
 
 mod cli;
@@ -71,18 +69,7 @@ async fn main() -> eyre::Result<()> {
         //     builder = builder.with_moongate_endpoint(endpoint)
     }
 
-    #[cfg(feature = "network_prover")]
-    let client = {
-        let np = NetworkProver::from_env().map_err(|_| {
-            eyre::eyre!("Failed to create NetworkProver from environment variables")
-        })?;
-        Arc::new(np)
-    };
-    #[cfg(not(feature = "network_prover"))]
-    let client = {
-        info!("Use local ProverClient");
-        Arc::new(ProverClient::new())
-    };
+    let client = Arc::new(ProverClient::new());
 
     let executor = FullExecutor::<EthExecutorComponents<_, _>, _>::try_new(
         http_provider.clone(),

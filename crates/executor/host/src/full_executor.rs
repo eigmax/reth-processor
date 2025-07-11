@@ -1,22 +1,21 @@
 use std::{
     fmt::{Debug, Formatter},
     path::{Path, PathBuf},
-    sync::Arc,
+    sync::{Arc, RwLock},
     time::{Duration, Instant},
 };
 
-use crate::{
-    executor_components::MaybeProveWithCycles, Config, ExecutionHooks, ExecutorComponents,
-    HostExecutor,
-};
+use crate::{Config, ExecutionHooks, ExecutorComponents, HostExecutor};
 use alloy_provider::Provider;
 use either::Either;
 use eyre::bail;
 use guest_executor::io::ClientExecutorInput;
+use lazy_static::lazy_static;
 use reth_primitives_traits::NodePrimitives;
 use revm_primitives::B256;
 use rpc_db::RpcDb;
 use serde::de::DeserializeOwned;
+use sha2::{Digest, Sha256};
 use tokio::{task, time::sleep};
 use tracing::{info, info_span, warn};
 use zkm_prover::components::DefaultProverComponents;
@@ -26,6 +25,10 @@ use zkm_sdk::{
 };
 
 pub type EitherExecutor<C, P> = Either<FullExecutor<C, P>, CachedExecutor<C>>;
+
+lazy_static! {
+    static ref ELF_ID: RwLock<String> = RwLock::new(Default::default());
+}
 
 pub async fn build_executor<C, P>(
     elf: Vec<u8>,
@@ -96,7 +99,24 @@ pub trait BlockExecutor<C: ExecutorComponents> {
             let client = self.client();
             let pk = self.pk();
 
-            let proof_with_cycles = client.prove_with_cycles(&pk, &stdin, prove_mode).await?;
+            let elf_id = hex::encode(Sha256::digest(&pk.elf));
+
+            let elf_id = if *ELF_ID.read().unwrap() != elf_id {
+                let mut id = ELF_ID.write().unwrap();
+                *id = elf_id;
+                None
+            } else {
+                Some(elf_id)
+            };
+            tracing::info!("elf id: {:?}", elf_id);
+
+            let proof_with_cycles = task::spawn_blocking(move || {
+                client
+                    .prove_with_cycles(&pk, &stdin, prove_mode, elf_id)
+                    .map_err(|err| eyre::eyre!("{err}"))
+            })
+            .await
+            .map_err(|err| eyre::eyre!("{err}"))??;
 
             let proving_duration = proving_start.elapsed();
             let proof_bytes = bincode::serialize(&proof_with_cycles.0.proof).unwrap();
