@@ -3809,7 +3809,6 @@ dependencies = [
  "futures",
  "guest-executor",
  "hex",
- "lazy_static",
  "mpt",
  "op-alloy-network",
  "primitives",

@@ -1,7 +1,7 @@
 use std::{
     fmt::{Debug, Formatter},
     path::{Path, PathBuf},
-    sync::{Arc, RwLock},
+    sync::{Arc, OnceLock},
     time::{Duration, Instant},
 };
 
@@ -10,7 +10,6 @@ use alloy_provider::Provider;
 use either::Either;
 use eyre::bail;
 use guest_executor::io::ClientExecutorInput;
-use lazy_static::lazy_static;
 use reth_primitives_traits::NodePrimitives;
 use revm_primitives::B256;
 use rpc_db::RpcDb;
@@ -26,9 +25,7 @@ use zkm_sdk::{
 
 pub type EitherExecutor<C, P> = Either<FullExecutor<C, P>, CachedExecutor<C>>;
 
-lazy_static! {
-    static ref ELF_ID: RwLock<String> = RwLock::new(Default::default());
-}
+static ELF_ID: OnceLock<String> = OnceLock::new();
 
 pub async fn build_executor<C, P>(
     elf: Vec<u8>,
@@ -99,14 +96,11 @@ pub trait BlockExecutor<C: ExecutorComponents> {
             let client = self.client();
             let pk = self.pk();
 
-            let elf_id = hex::encode(Sha256::digest(&pk.elf));
-
-            let elf_id = if *ELF_ID.read().unwrap() != elf_id {
-                let mut id = ELF_ID.write().unwrap();
-                *id = elf_id;
+            let elf_id = if ELF_ID.get().is_none() {
+                ELF_ID.set(hex::encode(Sha256::digest(&pk.elf))).unwrap();
                 None
             } else {
-                Some(elf_id)
+                Some(ELF_ID.get().unwrap().clone())
             };
             info!("elf id: {:?}", elf_id);
 
