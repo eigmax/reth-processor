@@ -237,6 +237,11 @@ impl<P: Provider<N> + Clone, N: Network> RpcDb<P, N> {
 
         for tx_trace in prestate.0 {
             for (address, account) in tx_trace.result {
+                // Fix error "TransferError::CreateCollision" in revm.
+                if account.nonce == Some(1) {
+                    continue;
+                }
+
                 if !self.accounts.read().map_err(|_| RpcDbError::Poisoned)?.contains_key(&address) {
                     let bytecode = account.code.clone().map(Bytecode::new_raw);
                     // Some RPC will return incorrect code and nonce for accounts with EIP-7702,
