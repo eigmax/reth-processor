@@ -117,7 +117,7 @@ async fn run_e2e<C, N>(
         Url::parse(std::env::var(env_var_key).unwrap().as_str()).expect("invalid rpc url");
     let provider = RootProvider::<N>::new_http(rpc_url);
 
-    let rpc_db = RpcDb::new(provider.clone(), block_number - 1);
+    let rpc_db = RpcDb::new(provider.clone(), provider.clone(), block_number - 1);
 
     // Execute the host.
     let client_input = host_executor

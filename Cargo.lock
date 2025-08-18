@@ -9997,8 +9997,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-build"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -10009,8 +10009,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-core-executor"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10050,8 +10050,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-core-machine"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -10102,8 +10102,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-curves"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "cfg-if",
  "curve25519-dalek",
@@ -10124,8 +10124,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-derive"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "quote",
  "syn 1.0.109",
@@ -10133,8 +10133,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-lib"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -10146,8 +10146,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-primitives"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "bincode",
  "hex",
@@ -10164,8 +10164,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-prover"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10203,8 +10203,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-recursion-circuit"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "hashbrown 0.14.5",
  "itertools 0.13.0",
@@ -10236,8 +10236,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-recursion-compiler"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "backtrace",
  "itertools 0.13.0",
@@ -10257,8 +10257,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-recursion-core"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "backtrace",
  "ff 0.13.1",
@@ -10293,8 +10293,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-recursion-derive"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "quote",
  "syn 1.0.109",
@@ -10302,8 +10302,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-recursion-gnark-ffi"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10327,8 +10327,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-sdk"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "alloy-signer 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "alloy-signer-local",
@@ -10374,8 +10374,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-stark"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "arrayref",
  "hashbrown 0.14.5",
@@ -10416,8 +10416,8 @@ dependencies = [
 
 [[package]]
 name = "zkm-zkvm"
-version = "1.1.2"
-source = "git+https://github.com/ProjectZKM/Ziren#4225372169648316f9c11e3f4b344a9a0d3363ca"
+version = "1.1.3"
+source = "git+https://github.com/ProjectZKM/Ziren#6b338c9e1ca7cc0a7bcde638872eaff5330f0a9d"
 dependencies = [
  "bincode",
  "cfg-if",
@@ -10476,16 +10476,6 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
-
-[[patch.unused]]
-name = "alloy-primitives"
-version = "1.0.0"
-source = "git+https://github.com/ziren-patches/core.git?branch=patch-alloy-primitives-1.0.0#1367f9d00583135013224d764b51d63ffcdd9145"
-
-[[patch.unused]]
-name = "alloy-primitives"
-version = "1.1.0"
-source = "git+https://github.com/ziren-patches/core.git?branch=patch-alloy-primitives-1.1.0#66386c419c93166f8471d3ace213d41ffcb13635"
 
 [[patch.unused]]
 name = "alloy-primitives"
