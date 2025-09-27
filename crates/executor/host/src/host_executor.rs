@@ -98,9 +98,9 @@ impl<C: ConfigureEvm> HostExecutor<C> {
         // Setup the database for the block executor.
         tracing::info!("setting up the database for the block executor");
         let now = std::time::Instant::now();
-        rpc_db.preload_accounts_and_storage().await.map_err(|e| {
-            HostError::Custom(format!("Failed to preload accounts and storage: {e}"))
-        })?;
+        // rpc_db.preload_accounts_and_storage().await.map_err(|e| {
+        //     HostError::Custom(format!("Failed to preload accounts and storage: {e}"))
+        // })?;
         tracing::info!("preloaded accounts and storage took {:?}", now.elapsed());
         let cache_db = CacheDB::new(rpc_db);
 
