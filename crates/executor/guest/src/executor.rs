@@ -1,5 +1,5 @@
 use std::sync::Arc;
-
+use itertools::Itertools;
 use alloy_consensus::{BlockHeader, Header, TxReceipt};
 use alloy_evm::EthEvmFactory;
 use alloy_primitives::{Bloom, B256};
@@ -12,15 +12,16 @@ use reth_evm::{
 use reth_evm_ethereum::EthEvmConfig;
 use reth_execution_types::ExecutionOutcome;
 use reth_primitives_traits::Block;
-use reth_trie::KeccakKeyHasher;
+use reth_trie::{EMPTY_ROOT_HASH, KeccakKeyHasher, TrieAccount};
 use revm::database::WrapDatabaseRef;
-use revm_primitives::Address;
+use revm::DatabaseRef;
+use revm_primitives::{Address, HashMap, U256};
 
 use crate::{
     custom::CustomEvmFactory,
     error::ClientError,
     into_primitives::FromInput,
-    io::{ClientExecutorInput, TrieDB},
+    io::{ClientExecutorInput, TrieDB, WitnessInput},
     tracking::OpCodesTrackingBlockExecutor,
     ValidateBlockPostExecution,
 };
@@ -32,6 +33,7 @@ pub const BLOCK_EXECUTION: &str = "block execution";
 pub const VALIDATE_EXECUTION: &str = "validate block post-execution";
 pub const ACCRUE_LOG_BLOOM: &str = "accrue logs bloom";
 pub const COMPUTE_STATE_ROOT: &str = "compute state root";
+pub const CHECK_SLOT_AND_VALUE: &str = "check slot and value";
 
 pub type EthClientExecutor = ClientExecutor<EthEvmConfig<CustomEvmFactory<EthEvmFactory>>>;
 
@@ -52,6 +54,7 @@ where
     pub fn execute(
         &self,
         mut input: ClientExecutorInput<C::Primitives>,
+        storage_info: Option<Vec<(Address, U256, U256)>>,
     ) -> Result<(Header, B256), ClientError> {
         // Initialize the witnessed database with verified storage proofs.
         let db = profile_report!(INIT_WITNESS_DB, {
@@ -132,6 +135,64 @@ where
             requests_hash: input.current_block.header().requests_hash(),
         };
 
+        if storage_info.is_some() {
+            let check_result: Result<(), ClientError> = profile_report!(CHECK_SLOT_AND_VALUE, {
+                let state = input.state();
+                let db = {
+                    for (hashed_address, storage_trie) in state.storage_tries.iter() {
+                        let account =
+                            state.state_trie.get_rlp::<TrieAccount>(hashed_address.as_slice()).unwrap();
+                        let storage_root = account.map_or(EMPTY_ROOT_HASH, |a| a.storage_root);
+                        if storage_root != storage_trie.hash() {
+                            return Err(ClientError::MismatchedStorageRoot);
+                        }
+                    }
+            
+                    let bytecodes_by_hash =
+                        input.bytecodes().map(|code| (code.hash_slow(), code)).collect::<HashMap<_, _>>();
+            
+                    // Verify and build block hashes
+                    let mut block_hashes: HashMap<u64, B256> = HashMap::with_hasher(Default::default());
+                    for (child_header, parent_header) in input.headers().tuple_windows() {
+                        if parent_header.number() != child_header.number() - 1 {
+                            return Err(ClientError::InvalidHeaderBlockNumber(
+                                parent_header.number() + 1,
+                                child_header.number(),
+                            ));
+                        }
+            
+                        let parent_header_hash = parent_header.hash_slow();
+                        if parent_header_hash != child_header.parent_hash() {
+                            return Err(ClientError::InvalidHeaderParentHash(
+                                parent_header_hash,
+                                child_header.parent_hash(),
+                            ));
+                        }
+            
+                        block_hashes.insert(parent_header.number(), child_header.parent_hash());
+                    }
+            
+                    TrieDB::new(state, block_hashes, bytecodes_by_hash)
+                };
+
+                for (contract_address, slot_id, expected_value) in storage_info.unwrap() {
+                    match db.storage_ref(contract_address, slot_id) {
+                        Ok(actual_value) => {
+                            if actual_value != expected_value {
+                                return Err(ClientError::FailedToCheckSlotAndValue(slot_id));
+                            } 
+                        },
+                        _ => {
+                            return Err(ClientError::FailedToFetchSlotAndValue(slot_id));
+                        }
+                    }
+                }
+                Ok(())
+            });
+            if check_result.is_err() {
+                return Err(check_result.err().unwrap());
+            }
+        }
         Ok((header, parent_state_root))
     }
 }
